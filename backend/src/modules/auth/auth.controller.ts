@@ -5,7 +5,7 @@ import { LoginSchema } from "../../schemas/auth.schema.js";
 import type { LoginBody } from "../../types/auth.types.js";
 import statusCodes from "../../utils/statusCodes.js";
 import { statusMessages } from "../../utils/statusMessages.js";
-import { AUTH_TOKEN } from "../../utils/constants.js";
+import { AUTH_TOKEN, cookieOptions } from "../../utils/constants.js";
 
 
 const AuthController: FastifyPluginCallback = async (instance, opts) => {
@@ -25,7 +25,7 @@ const AuthController: FastifyPluginCallback = async (instance, opts) => {
       const response = await fastify.authService.login(phoneNumber, password, role)
 
       if (response.success) {
-        reply.setCookie(AUTH_TOKEN, response.token!)
+        reply.setCookie(AUTH_TOKEN, response.token!, cookieOptions)
       }
 
       return reply.status(response.code).send(response)

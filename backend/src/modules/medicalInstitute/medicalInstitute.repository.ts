@@ -1,5 +1,5 @@
 
-import type { PrismaClient } from "../../prisma/generated/prisma/index.js";
+import type { MedicalInstitute, PrismaClient } from "../../prisma/generated/prisma/index.js";
 import type { RegisterNewMedicalInstituteBody } from "../../types/medicalInstitute.types.js";
 import bcrypt from "bcryptjs";
 
@@ -22,6 +22,14 @@ export class MedicalInstituteRepository {
     })
 
     return institute ? true : false
+  }
+
+  async getInstituteById(id: MedicalInstitute['id']) {
+    return await this.prisma.medicalInstitute.findFirst({
+      where: {
+        id
+      }
+    })
   }
 
   async registerMedicalInstitute({

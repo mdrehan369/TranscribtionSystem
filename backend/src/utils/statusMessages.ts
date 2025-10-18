@@ -13,5 +13,9 @@ export const statusMessages = {
     signedInSuccessfully: "Signed in successfully!",
     alreadyLoggedIn: "Already logged in!",
     signedOutSuccessfully: "Signed out successfully!",
+  },
+  doctor: {
+    alreadyExists: "Doctor already exists!",
+    noInstitute: "No institute found!"
   }
 }

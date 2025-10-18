@@ -5,7 +5,7 @@ import { RegisterMedicalInstitueSchema } from "../../schemas/medicalInstitute.sc
 import type { RegisterNewMedicalInstituteBody } from "../../types/medicalInstitute.types.js";
 import { AuthService } from "../auth/auth.service.js";
 import { Role } from "../../types/auth.types.js";
-import { AUTH_TOKEN } from "../../utils/constants.js";
+import { AUTH_TOKEN, cookieOptions } from "../../utils/constants.js";
 
 const MedicalInstituteController: FastifyPluginCallback = async (instance, opts) => {
 
@@ -27,7 +27,7 @@ const MedicalInstituteController: FastifyPluginCallback = async (instance, opts)
         const authService = new AuthService(fastify.prisma)
         const admin = response.data!.admin!
         const { success, token } = await authService.login(admin.phoneNumber, admin?.password, Role.ADMIN)
-        if (success) reply.setCookie(AUTH_TOKEN, token!)
+        if (success) reply.setCookie(AUTH_TOKEN, token!, cookieOptions)
       }
 
       return reply.status(response.code).send(response)
