@@ -1,4 +1,4 @@
-export const statusMessages: { [key: string]: any } = {
+export const statusMessages = {
   success: "Operation completed successfully.",
   error: "An error occurred during the operation.",
   notFound: "The requested resource was not found.",
@@ -10,5 +10,8 @@ export const statusMessages: { [key: string]: any } = {
     tokenExpired: "Your session has expired. Please log in again.",
     accessDenied: "You do not have permission to access this resource.",
     notLoggedIn: "You must be logged in to access this resource.",
+    signedInSuccessfully: "Signed in successfully!",
+    alreadyLoggedIn: "Already logged in!",
+    signedOutSuccessfully: "Signed out successfully!",
   }
 }

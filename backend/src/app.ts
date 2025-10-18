@@ -14,6 +14,8 @@ import prismaPlugin from "./plugins/prisma.plugin.js"
 
 import MedicalInstituteController from "./modules/medicalInstitute/medicalInstitute.controller.js";
 import authPlugin from "./plugins/auth.plugin.js";
+import DoctorController from "./modules/doctor/doctor.controller.js";
+import AuthController from "./modules/auth/auth.controller.js";
 
 const fastify = Fastify({ logger });
 
@@ -30,7 +32,9 @@ await fastify.register(cors, corsOptions);
 await fastify.register(prismaPlugin)
 await fastify.register(authPlugin)
 
+await fastify.register(AuthController, { prefix: "/api/v1/auth" })
 await fastify.register(MedicalInstituteController, { prefix: "/api/v1/medical-institute" });
+await fastify.register(DoctorController, { prefix: "/api/v1/doctor" });
 
 fastify.get("/", async () => {
   return { hello: "world" };

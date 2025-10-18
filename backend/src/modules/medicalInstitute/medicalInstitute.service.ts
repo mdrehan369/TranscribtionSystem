@@ -1,49 +1,30 @@
-import type { Prisma, PrismaClient } from "../../prisma/generated/prisma/index.js";
+import type { PrismaClient } from "../../prisma/generated/prisma/index.js";
 import type { RegisterNewMedicalInstituteBody } from "../../types/medicalInstitute.types.js";
+import statusCodes from "../../utils/statusCodes.js";
+import { AdminRepository } from "../admin/admin.repository.js";
+import { MedicalInstituteRepository } from "./medicalInstitute.repository.js";
 
-export class MedicalInstituteRepository {
-  private prisma: PrismaClient
+export class MedicalInstituteService {
+  private medicalInstituteRepository: MedicalInstituteRepository
+  private adminRepository: AdminRepository
 
   constructor(prisma: PrismaClient) {
-    this.prisma = prisma
+    this.medicalInstituteRepository = new MedicalInstituteRepository(prisma)
+    this.adminRepository = new AdminRepository(prisma)
   }
 
-  async doesExists(name: string, contactEmail: string, contactNumber: string) {
-    const institute = await this.prisma.medicalInstitute.findFirst({
-      where: {
-        OR: [
-          { name },
-          { contactEmail },
-          { contactNumber }
-        ]
-      }
-    })
+  async registerNewMedicalInstitute(data: RegisterNewMedicalInstituteBody) {
+    const doesExists = await this.medicalInstituteRepository.doesExists(data.name, data.contactEmail, data.contactNumber)
+    if (doesExists) return { code: statusCodes.BAD_REQUEST, message: "Medical Institute Already Exists", success: false }
 
-    return institute ? true : false
-  }
+    const doesAdminExists = await this.adminRepository.doesExists(data.admin.email, data.admin.phoneNumber)
+    if (doesAdminExists) return { code: statusCodes.BAD_REQUEST, message: "Admin Already Exists For Other Medical Institution", success: false }
 
-  async registerMedicalInstitute({
-    address,
-    contactEmail,
-    contactNumber,
-    name,
-    webhookUrl,
-    admin
-  }: RegisterNewMedicalInstituteBody) {
-    const newInstitute = await this.prisma.medicalInstitute.create({
-      data: {
-        address,
-        name,
-        contactEmail,
-        contactNumber,
-        webhookUrl,
-        admin: {
-          create: admin
-        }
-      }
-    })
+    const newInstitute = await this.medicalInstituteRepository.registerMedicalInstitute(data)
 
-    return newInstitute
+    return { code: statusCodes.CREATED, data: newInstitute, success: true }
   }
 
 }
+
+

@@ -18,6 +18,10 @@ const schema = {
       type: "string",
       default: "http://localhost:3000",
     },
+    JWT_SECRET_KEY: {
+      type: "string",
+      default: "secret"
+    }
   },
 };
 
@@ -26,6 +30,7 @@ export type EnvConfig = {
   HOST: string;
   COOKIE: string;
   FRONTEND_URL: string;
+  JWT_SECRET_KEY: string;
 };
 
 export const envOptions = {
