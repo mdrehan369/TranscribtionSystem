@@ -4,7 +4,7 @@ export const statusMessages = {
   notFound: "The requested resource was not found.",
   unauthorized: "You are not authorized to perform this action.",
   badRequest: "The request was invalid or cannot be served.",
-
+  internalServerError: "Some error occurred while processing request",
   auth: {
     invalidCredentials: "The provided credentials are invalid.",
     tokenExpired: "Your session has expired. Please log in again.",

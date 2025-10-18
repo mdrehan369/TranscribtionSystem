@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import whisper
 import os
 import shutil
@@ -11,7 +12,15 @@ model = whisper.load_model("base")
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@app.post("/transcribe")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/api/v1/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
     try:
         temp_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -23,8 +32,9 @@ async def transcribe_audio(file: UploadFile = File(...)):
         os.remove(temp_path)
 
         return JSONResponse(content={
+            "success": True,
             "filename": file.filename,
-            "text": result["text"].strip()
+            "data": result["text"].strip()
         })
 
     except Exception as e:
