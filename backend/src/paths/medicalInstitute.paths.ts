@@ -1,0 +1,2 @@
+
+export const REGISTER_NEW_MEDICAL_INSTITUTE = '/'

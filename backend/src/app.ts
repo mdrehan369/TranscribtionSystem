@@ -8,6 +8,12 @@ import logger from "./config/logger.config.js"
 import fastifyEnv from "@fastify/env";
 import { envOptions, type EnvConfig } from "./config/env.config.js";
 import { corsOptions } from "./config/cors.config.js";
+import fastifyCookie from "@fastify/cookie";
+
+import prismaPlugin from "./plugins/prisma.plugin.js"
+
+import MedicalInstituteController from "./modules/medicalInstitute/medicalInstitute.controller.js";
+import authPlugin from "./plugins/auth.plugin.js";
 
 const fastify = Fastify({ logger });
 
@@ -15,7 +21,16 @@ await fastify.register(fastifyMultipart);
 
 await fastify.register(fastifyEnv, envOptions)
 
+await fastify.register(fastifyCookie, {
+  secret: fastify.getEnvs<EnvConfig>().COOKIE, // Required for signed cookies
+});
+
 await fastify.register(cors, corsOptions);
+
+await fastify.register(prismaPlugin)
+await fastify.register(authPlugin)
+
+await fastify.register(MedicalInstituteController, { prefix: "/api/v1/medical-institute" });
 
 fastify.get("/", async () => {
   return { hello: "world" };

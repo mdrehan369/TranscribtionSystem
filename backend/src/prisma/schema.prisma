@@ -14,12 +14,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model MedicalInsitute {
+model MedicalInstitute {
   id            Int      @id @default(autoincrement())
   name          String
   address       String
   contactEmail  String   @unique
   contactNumber String
+  webhookUrl    String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -28,30 +29,30 @@ model MedicalInsitute {
 }
 
 model Admin {
-  id                Int      @id @default(autoincrement())
-  firstName         String
-  lastName          String
-  email             String   @unique
-  phoneNumber       String   @unique
-  medicalInsituteId Int      @unique
-  password          String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  email              String   @unique
+  phoneNumber        String   @unique
+  medicalInstituteId Int      @unique
+  password           String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  medicalInsitute MedicalInsitute @relation(fields: [medicalInsituteId], references: [id])
+  medicalInstitute MedicalInstitute @relation(fields: [medicalInstituteId], references: [id])
 }
 
 model Doctor {
-  id                Int      @id @default(autoincrement())
-  firstName         String
-  lastName          String
-  email             String   @unique
-  phoneNumber       String   @unique
-  specialization    String
-  medicalInsituteId Int
-  password          String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  email              String   @unique
+  phoneNumber        String   @unique
+  specialization     String
+  medicalInstituteId Int
+  password           String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  medicalInsitute MedicalInsitute @relation(fields: [medicalInsituteId], references: [id])
+  medicalInstitute MedicalInstitute @relation(fields: [medicalInstituteId], references: [id])
 }
