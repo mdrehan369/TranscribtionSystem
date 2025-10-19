@@ -17,5 +17,9 @@ export const statusMessages = {
   doctor: {
     alreadyExists: "Doctor already exists!",
     noInstitute: "No institute found!"
+  },
+  health: {
+    live: "System is live!",
+    ready: "Ready check done!"
   }
 }

@@ -40,3 +40,11 @@ async def transcribe_audio(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/health/live")
+async def healthCheck():
+    return JSONResponse(
+        content={
+            "success": True
+        }
+    )
+

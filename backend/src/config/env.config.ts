@@ -18,6 +18,10 @@ const schema = {
       type: "string",
       default: "http://localhost:3000",
     },
+    TRANSCRIBER_URL: {
+      type: "string",
+      default: "http://localhost:8000",
+    },
     JWT_SECRET_KEY: {
       type: "string",
       default: "secret"
@@ -30,6 +34,7 @@ export type EnvConfig = {
   HOST: string;
   COOKIE: string;
   FRONTEND_URL: string;
+  TRANSCRIBER_URL: string;
   JWT_SECRET_KEY: string;
 };
 
