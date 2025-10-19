@@ -15,6 +15,7 @@ const TranscribeController: FastifyPluginCallback = async (fastify, opts) => {
 
   fastify.post(
     UPLOAD_AUDIO_PATH,
+    { schema: { tags: ['Transcribe'] } },
     async function upload(req: FastifyRequest, reply: FastifyReply) {
       fastify.log.info("Request Incoming for file upload")
       if (!req.user || req.role === Role.ADMIN) return reply.status(statusCodes.UNAUTHORIZED).send({ message: statusMessages.unauthorized, success: false })

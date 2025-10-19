@@ -6,7 +6,7 @@ import { checkDbHealth, checkExternalServiceHealth } from "../../utils/health.js
 import type { EnvConfig } from "../../config/env.config.js";
 
 const HealthController: FastifyPluginCallback = async (fastify, opts) => {
-  fastify.get(LIVE_CHECK, {}, async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.get(LIVE_CHECK, { schema: { tags: ['Health'] } }, async (req: FastifyRequest, reply: FastifyReply) => {
     return reply.status(statusCodes.OK).send({
       success: true,
       message: statusMessages.health.live,
@@ -16,7 +16,7 @@ const HealthController: FastifyPluginCallback = async (fastify, opts) => {
     })
   })
 
-  fastify.get(READY_CHECK, {}, async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.get(READY_CHECK, { schema: { tags: ['Health'] } }, async (req: FastifyRequest, reply: FastifyReply) => {
 
     const response = {
       status: "UP",

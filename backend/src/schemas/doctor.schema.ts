@@ -2,6 +2,7 @@ import type { FastifySchema } from "fastify";
 
 
 export const AddDoctorSchema: FastifySchema = {
+  tags: ['Doctor'],
   body: {
     required: ['firstName', 'lastName', 'specialization', 'phoneNumber', 'email', 'password'],
     type: 'object',

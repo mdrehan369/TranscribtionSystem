@@ -6,6 +6,8 @@ import fastifyEnv from "@fastify/env";
 import { envOptions, type EnvConfig } from "./config/env.config.js";
 import { corsOptions } from "./config/cors.config.js";
 import fastifyCookie from "@fastify/cookie";
+import swagger from "@fastify/swagger"
+import swaggerUi from "@fastify/swagger-ui"
 
 import prismaPlugin from "./plugins/prisma.plugin.js"
 
@@ -15,6 +17,7 @@ import DoctorController from "./modules/doctor/doctor.controller.js";
 import AuthController from "./modules/auth/auth.controller.js";
 import TranscribeController from "./modules/transcribe/transcribe.controller.js";
 import HealthController from "./modules/health/health.controller.js";
+import { swaggerConfig, swaggerUiConfig } from "./config/swagger.config.js";
 
 const fastify = Fastify({ logger });
 
@@ -31,15 +34,15 @@ await fastify.register(cors, corsOptions);
 await fastify.register(prismaPlugin)
 await fastify.register(authPlugin)
 
+await fastify.register(swagger, swaggerConfig);
+await fastify.register(swaggerUi, swaggerUiConfig);
+
 await fastify.register(AuthController, { prefix: "/api/v1/auth" })
 await fastify.register(MedicalInstituteController, { prefix: "/api/v1/medical-institute" });
 await fastify.register(DoctorController, { prefix: "/api/v1/doctor" });
 await fastify.register(TranscribeController, { prefix: "/api/v1/transcribe" });
 await fastify.register(HealthController);
 
-fastify.get("/", async () => {
-  return { hello: "world" };
-});
 
 const start = async () => {
   try {

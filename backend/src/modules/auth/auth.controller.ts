@@ -32,7 +32,7 @@ const AuthController: FastifyPluginCallback = async (instance, opts) => {
     })
 
   fastify.get(LOGOUT_PATH,
-    {},
+    { schema: { tags: ['Auth'] } },
     async (req: FastifyRequest, reply: FastifyReply) => {
       if (!req.user) return reply.status(statusCodes.BAD_REQUEST).send({ success: false, message: statusMessages.auth.notLoggedIn })
       reply.clearCookie(AUTH_TOKEN).status(statusCodes.OK).send({ success: true, message: statusMessages.auth.signedOutSuccessfully })

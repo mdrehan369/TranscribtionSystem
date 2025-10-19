@@ -1,6 +1,7 @@
 import type { FastifySchema } from "fastify";
 
 export const RegisterMedicalInstitueSchema: FastifySchema = {
+  tags: ['Medical Institute'],
   body: {
     type: "object",
     required: ["name", "address", "contactNumber", "admin", "contactEmail"],

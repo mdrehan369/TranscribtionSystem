@@ -2,6 +2,7 @@ import type { FastifySchema } from "fastify";
 
 
 export const LoginSchema: FastifySchema = {
+  tags: ['Auth'],
   body: {
     type: 'object',
     required: ['phoneNumber', 'password', 'role'],
