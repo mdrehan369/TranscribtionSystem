@@ -26,6 +26,6 @@ export class AuthService {
       role
     })
 
-    return { success: true, message: statusMessages.auth.signedInSuccessfully, token, data: user, code: statusCodes.OK }
+    return { success: true, message: statusMessages.auth.signedInSuccessfully, token, data: { user, role }, code: statusCodes.OK }
   }
 }

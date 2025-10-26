@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
 import { AuthService } from "./auth.service.js";
-import { LOGIN_PATH, LOGOUT_PATH } from "../../paths/auth.paths.js";
+import { GET_USER_PATH, LOGIN_PATH, LOGOUT_PATH } from "../../paths/auth.paths.js";
 import { LoginSchema } from "../../schemas/auth.schema.js";
 import type { LoginBody } from "../../types/auth.types.js";
 import statusCodes from "../../utils/statusCodes.js";
@@ -37,6 +37,14 @@ const AuthController: FastifyPluginCallback = async (instance, opts) => {
       if (!req.user) return reply.status(statusCodes.BAD_REQUEST).send({ success: false, message: statusMessages.auth.notLoggedIn })
       reply.clearCookie(AUTH_TOKEN).status(statusCodes.OK).send({ success: true, message: statusMessages.auth.signedOutSuccessfully })
     })
+
+  fastify.get(GET_USER_PATH,
+    { schema: { tags: ['Auth'] } },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!req.user) return reply.status(statusCodes.BAD_REQUEST).send({ success: false, message: statusMessages.auth.tokenExpired })
+      return reply.status(statusCodes.OK).send({ success: true, message: statusMessages.success, data: { user: req.user, role: req.role } })
+    }
+  )
 }
 
 export default AuthController
