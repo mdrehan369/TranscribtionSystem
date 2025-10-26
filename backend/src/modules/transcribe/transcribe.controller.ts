@@ -44,7 +44,7 @@ const TranscribeController: FastifyPluginCallback = async (fastify, opts) => {
         const medicalInstituteRepo = new MedicalInstituteRepository(fastify.prisma)
         const medicalInstitute = await medicalInstituteRepo.getInstituteById(req.user.medicalInstituteId)
         if (!medicalInstitute) return reply.status(statusCodes.NOT_FOUND).send({ success: false, message: statusMessages.notFound })
-        const webhookResponse = await axios.post(medicalInstitute.webhookUrl, response.data)
+        const webhookResponse = await axios.post(medicalInstitute.webhookUrl, response.data, { validateStatus: () => true })
         return reply.status(statusCodes.OK).send({ success: true, message: "File uploaded successfully", data: webhookResponse.data });
       } catch (error) {
         return reply.status(statusCodes.INTERNAL_SERVER_ERROR).send({ success: true, message: statusMessages.internalServerError });

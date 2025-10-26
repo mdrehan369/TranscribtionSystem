@@ -27,7 +27,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        result = model.transcribe(temp_path)
+        result = model.transcribe(temp_path, task="transcribe")
 
         os.remove(temp_path)
 
