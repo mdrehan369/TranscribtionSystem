@@ -1,50 +1,47 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { apiClient } from "@/lib/api-client"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-interface Doctor {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  phoneNumber: string
-  specialization: string
-}
+import { Controller, useForm } from "react-hook-form"
+import z from "zod"
+import { addDoctorSchema } from "@/zod/doctor.schema"
+import { Department, DoctorSpecialization, DoctorType, IDoctor } from "@/types/doctor.types"
+import FormInput from "../form/FormInput"
+import FormCombobox from "../form/FormCombobox"
+import FormRadioGroup from "../form/FormRadioGroup"
+
 
 export function DoctorManagement() {
   const [showAddForm, setShowAddForm] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    specialization: "",
-    password: "",
+
+  const { register, handleSubmit, formState, control } = useForm<z.infer<typeof addDoctorSchema>>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      specialization: DoctorSpecialization.CARDIOLOGY,
+      department: Department.ANESTHESIOLOGY,
+      password: "",
+      doctorType: DoctorType.CORPORATE
+    },
+    resolver: zodResolver(addDoctorSchema),
   })
 
   const { data: doctors = [], refetch } = useQuery({
     queryKey: ["doctors"],
-    queryFn: () => apiClient.get<Doctor[]>("/api/v1/doctor/"),
+    queryFn: () => apiClient.get<IDoctor[]>("/api/v1/doctor/"),
   })
 
   const addDoctorMutation = useMutation({
-    mutationFn: (data: typeof formData) => apiClient.post("/api/v1/doctor/", data),
+    mutationFn: (data: z.infer<typeof addDoctorSchema>) => apiClient.post("/api/v1/doctor/", data),
     onSuccess: () => {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        specialization: "",
-        password: "",
-      })
       setShowAddForm(false)
       refetch()
     },
@@ -63,16 +60,9 @@ export function DoctorManagement() {
     },
   })
 
-  const handleAddDoctor = (e: React.FormEvent) => {
-    e.preventDefault()
-    addDoctorMutation.mutate(formData)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
+  const onSubmit = (data: z.infer<typeof addDoctorSchema>) => {
+    console.log(data)
+    addDoctorMutation.mutate(data)
   }
 
   return (
@@ -88,80 +78,58 @@ export function DoctorManagement() {
             <CardTitle className="text-base">Add New Doctor</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleAddDoctor} className="space-y-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium">First Name</label>
-                  <Input
-                    name="firstName"
-                    placeholder="First name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Last Name</label>
-                  <Input
-                    name="lastName"
-                    placeholder="Last name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                <FormInput label="First Name" name="firstName" placeholder="First name" register={register} errors={formState.errors} />
+                <FormInput label="Last Name" name="lastName" placeholder="Last name" register={register} errors={formState.errors} />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput label="Email" name="email" type="email" placeholder="Email address" register={register} errors={formState.errors} />
+                <Controller
+                  name="department"
+                  control={control}
+                  render={({ field: { onChange }, fieldState: { error } }) => <FormCombobox
+                    label="Department"
+                    data={Object.values(Department).map(dep => ({ value: dep, label: dep.replaceAll("_", " ") }))}
+                    onChange={onChange}
+                    placeholder="Select Department"
+                    error={error}
+                  />}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium">Phone Number</label>
-                  <Input
-                    name="phoneNumber"
-                    type="tel"
-                    placeholder="Phone"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Specialization</label>
-                  <Input
-                    name="specialization"
-                    placeholder="e.g., Cardiology"
-                    value={formData.specialization}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Password</label>
-                <Input
-                  name="password"
-                  type="password"
-                  placeholder="Set password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
+                <FormInput label="Phone Number" name="phoneNumber" placeholder="Phone number" register={register} errors={formState.errors} />
+                <Controller
+                  name="specialization"
+                  control={control}
+                  render={({ field: { onChange }, fieldState: { error } }) => <FormCombobox
+                    label="Specialization"
+                    data={Object.values(DoctorSpecialization).map(dep => ({ value: dep, label: dep.replaceAll("_", " ") }))}
+                    onChange={onChange}
+                    placeholder="Select Specialization"
+                    error={error}
+                  />}
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={addDoctorMutation.isPending}>
-                {addDoctorMutation.isPending ? "Adding..." : "Add Doctor"}
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput label="Password" name="password" type="password" placeholder="Password" register={register} errors={formState.errors} />
+                <Controller
+                  name="doctorType"
+                  control={control}
+                  render={({ field: { onChange }, fieldState: { error } }) => <FormRadioGroup
+                    label="Doctor Type"
+                    onChange={onChange}
+                    defaultValue={DoctorType.CORPORATE}
+                    values={Object.keys(DoctorType)}
+                    error={error}
+                  />}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={formState.isSubmitting}>
+                {formState.isSubmitting ? "Adding..." : "Add Doctor"}
               </Button>
             </form>
           </CardContent>

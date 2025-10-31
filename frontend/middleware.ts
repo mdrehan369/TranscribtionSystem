@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get("auth_token")
   const pathname = request.nextUrl.pathname
 
-  if (pathname == "/login") return NextResponse.next()
+  if (pathname == "/login" || pathname == "/register") return NextResponse.next()
 
   const response = await fetch(`${API_BASE_URL}/auth`, {
     method: "GET",

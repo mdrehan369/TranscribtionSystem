@@ -12,10 +12,8 @@ export default fp(async (fastify, opts) => {
 
   fastify.addHook("onRequest", async (req: FastifyRequest, reply: FastifyReply) => {
 
-    const token = req.cookies.auth_token
-    fastify.log.info(req.cookies)
+    const token = req.cookies[AUTH_TOKEN]
     if (token) {
-      fastify.log.debug(token)
       const decodedToken = jwt.decode(token) as JwtToken
       let user = null
       if (decodedToken) {

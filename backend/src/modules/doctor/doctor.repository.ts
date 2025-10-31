@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import type { MedicalInstitute, PrismaClient } from "../../prisma/generated/prisma/index.js";
+import type { Doctor, MedicalInstitute, PrismaClient } from "../../prisma/generated/prisma/index.js";
 import type { AddDoctorBody } from "../../types/doctor.types.js";
 
 export class DoctorRepository {
@@ -17,7 +17,7 @@ export class DoctorRepository {
     return doctor ? true : false
   }
 
-  async addDoctor(data: AddDoctorBody, instituteId: MedicalInstitute['id']) {
+  async addDoctor(data: AddDoctorBody & { slug: string; }, instituteId: MedicalInstitute['id']) {
     data['password'] = bcrypt.hashSync(data['password'])
     const newDoctor = await this.prisma.doctor.create({
       data: {

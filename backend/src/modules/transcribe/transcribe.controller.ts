@@ -10,17 +10,27 @@ import { statusMessages } from "../../utils/statusMessages.js";
 import FormData from "form-data";
 import { Role } from "../../types/auth.types.js";
 import { MedicalInstituteRepository } from "../medicalInstitute/medicalInstitute.repository.js";
+import { DoctorType } from "../../prisma/generated/prisma/index.js";
+import { CreateTranscriptionSchema } from "../../schemas/transcription.schema.js";
+import { ConsultationService } from "../consultation/consultation.service.js";
+import type { CreatePatientBody } from "../../types/patient.types.js";
 
 const TranscribeController: FastifyPluginCallback = async (fastify, opts) => {
 
   fastify.post(
     UPLOAD_AUDIO_PATH,
-    { schema: { tags: ['Transcribe'] } },
-    async function upload(req: FastifyRequest, reply: FastifyReply) {
+    { schema: CreateTranscriptionSchema },
+    async function upload(req: FastifyRequest<{
+      Body: {
+        patient: CreatePatientBody;
+        notes: string;
+      }
+    }>, reply: FastifyReply) {
       fastify.log.info("Request Incoming for file upload")
       if (!req.user || req.role === Role.ADMIN) return reply.status(statusCodes.UNAUTHORIZED).send({ message: statusMessages.unauthorized, success: false })
 
       const file = await req.file();
+      const { notes, patient } = req.body
 
       fastify.log.info(file?.filename)
 
@@ -44,8 +54,17 @@ const TranscribeController: FastifyPluginCallback = async (fastify, opts) => {
         const medicalInstituteRepo = new MedicalInstituteRepository(fastify.prisma)
         const medicalInstitute = await medicalInstituteRepo.getInstituteById(req.user.medicalInstituteId)
         if (!medicalInstitute) return reply.status(statusCodes.NOT_FOUND).send({ success: false, message: statusMessages.notFound })
-        const webhookResponse = await axios.post(medicalInstitute.webhookUrl, response.data, { validateStatus: () => true })
-        return reply.status(statusCodes.OK).send({ success: true, message: "File uploaded successfully", data: webhookResponse.data });
+
+        const consultationService = new ConsultationService(fastify.prisma)
+        const consultation = await consultationService.addConsultation({ patient, notes, doctorId: req.user.id })
+
+        if ("doctorType" in req.user && req.user.doctorType === DoctorType.CORPORATE) {
+          const webhookResponse = await axios.post(medicalInstitute.webhookUrl!, response.data, { validateStatus: () => true })
+          return reply.status(statusCodes.OK).send({ success: true, message: "File uploaded successfully", data: { webhookResponse: webhookResponse.data, consultation } });
+        } else {
+          await consultationService.addTranscript(consultation.id, response.data.data)
+          return reply.status(statusCodes.OK).send({ success: true, message: "File uploaded successfully", data: { consultation } });
+        }
       } catch (error) {
         return reply.status(statusCodes.INTERNAL_SERVER_ERROR).send({ success: true, message: statusMessages.internalServerError });
       } finally {

@@ -38,13 +38,15 @@ export class MedicalInstituteRepository {
     contactNumber,
     name,
     webhookUrl,
-    admin
-  }: RegisterNewMedicalInstituteBody) {
+    admin,
+    slug
+  }: RegisterNewMedicalInstituteBody & { slug: string; admin: { slug: string } }) {
     admin['password'] = bcrypt.hashSync(admin.password)
     const newInstitute = await this.prisma.medicalInstitute.create({
       data: {
         address,
         name,
+        slug,
         contactEmail,
         contactNumber,
         webhookUrl,

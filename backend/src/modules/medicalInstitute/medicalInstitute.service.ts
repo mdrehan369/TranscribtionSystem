@@ -1,5 +1,6 @@
 import type { PrismaClient } from "../../prisma/generated/prisma/index.js";
 import type { RegisterNewMedicalInstituteBody } from "../../types/medicalInstitute.types.js";
+import generateAlphanumeric from "../../utils/generateSlug.js";
 import statusCodes from "../../utils/statusCodes.js";
 import { AdminRepository } from "../admin/admin.repository.js";
 import { MedicalInstituteRepository } from "./medicalInstitute.repository.js";
@@ -20,7 +21,10 @@ export class MedicalInstituteService {
     const doesAdminExists = await this.adminRepository.doesExists(data.admin.email, data.admin.phoneNumber)
     if (doesAdminExists) return { code: statusCodes.BAD_REQUEST, message: "Admin Already Exists For Other Medical Institution", success: false }
 
-    const newInstitute = await this.medicalInstituteRepository.registerMedicalInstitute(data)
+    const slug = generateAlphanumeric(10)
+    const adminSlug = generateAlphanumeric(10)
+
+    const newInstitute = await this.medicalInstituteRepository.registerMedicalInstitute({ ...data, slug, admin: { ...data.admin, slug: adminSlug } })
 
     return { code: statusCodes.CREATED, data: newInstitute, success: true }
   }

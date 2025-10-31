@@ -1,5 +1,6 @@
 import type { MedicalInstitute, PrismaClient } from "../../prisma/generated/prisma/index.js";
 import type { AddDoctorBody } from "../../types/doctor.types.js";
+import generateAlphanumeric from "../../utils/generateSlug.js";
 import statusCodes from "../../utils/statusCodes.js";
 import { statusMessages } from "../../utils/statusMessages.js";
 import { MedicalInstituteRepository } from "../medicalInstitute/medicalInstitute.repository.js";
@@ -21,7 +22,9 @@ export class DoctorService {
     const doesInstituteExists = await this.medicalInstituteRepository.getInstituteById(Number(instituteId))
     if (!doesInstituteExists) return { success: false, message: statusMessages.doctor.noInstitute, code: statusCodes.BAD_REQUEST }
 
-    const newDoctor = await this.doctorRepository.addDoctor(data, instituteId)
+    const slug = generateAlphanumeric(10)
+
+    const newDoctor = await this.doctorRepository.addDoctor({ ...data, slug }, instituteId)
     return { success: true, message: statusMessages.success, code: statusCodes.CREATED, data: newDoctor }
   }
 }

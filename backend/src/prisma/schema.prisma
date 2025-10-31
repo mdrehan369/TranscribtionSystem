@@ -16,6 +16,7 @@ datasource db {
 
 model MedicalInstitute {
   id            Int      @id @default(autoincrement())
+  slug          String   @unique
   name          String
   address       String
   contactEmail  String   @unique
@@ -30,6 +31,7 @@ model MedicalInstitute {
 
 model Admin {
   id                 Int      @id @default(autoincrement())
+  slug               String   @unique
   firstName          String
   lastName           String
   email              String   @unique
@@ -43,18 +45,19 @@ model Admin {
 }
 
 model Doctor {
-  id                 Int        @id @default(autoincrement())
-  slug               String     @unique
+  id                 Int                  @id @default(autoincrement())
+  slug               String               @unique
   firstName          String
   lastName           String
-  email              String     @unique
-  phoneNumber        String     @unique
-  specialization     String
-  department         Department @default(GENERAL)
+  email              String               @unique
+  phoneNumber        String               @unique
+  specialization     DoctorSpecialization
+  department         Department           @default(GENERAL)
+  doctorType         DoctorType           @default(CORPORATE)
   medicalInstituteId Int
   password           String
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   medicalInstitute MedicalInstitute @relation(fields: [medicalInstituteId], references: [id], onDelete: Cascade)
   patients         Patient[]
@@ -119,6 +122,23 @@ enum Department {
   RADIOLOGY
   SURGERY
   UROLOGY
+}
+
+enum DoctorSpecialization {
+  GENERAL_MEDICINE
+  INTERNAL_MEDICINE
+  ORTHOPAEDICS
+  PAEDIATRICS
+  CARDIOLOGY
+  NEUROLOGY
+  GASTROENTEROLOGY
+  OPHTHALMOLOGY
+  ENT
+  DERMATOLOGY
+  GYNAECOLOGY_OBSTETRICS
+  RADIOLOGY
+  ANESTHESIOLOGY
+  PSYCHIATRY
 }
 
 enum DoctorType {
