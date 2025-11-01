@@ -3,6 +3,7 @@ export interface IDoctor {
   firstName: string;
   lastName: string;
   email: string;
+  slug: string;
   phoneNumber: string;
   specialization: DoctorSpecialization;
   doctorType: DoctorType;

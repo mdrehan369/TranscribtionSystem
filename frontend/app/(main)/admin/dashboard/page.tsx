@@ -4,9 +4,16 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DoctorManagement } from "@/components/admin/doctor-management"
+import { useQuery } from "@tanstack/react-query"
+import { apiClient } from "@/lib/api-client"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "doctors">("overview")
+
+  const { data } = useQuery({
+    queryKey: ["stats"],
+    queryFn: async () => (await apiClient.get<{ data: { doctors: number; consultations: number; patients: number } }>("/api/v1/admin/overview")).data
+  })
 
   return (
     <div className="space-y-6">
@@ -31,7 +38,7 @@ export default function AdminDashboard() {
               <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{data?.doctors}</div>
               <p className="text-xs text-(--color-text-muted) mt-1">Active doctors</p>
             </CardContent>
           </Card>
@@ -41,18 +48,18 @@ export default function AdminDashboard() {
               <CardTitle className="text-sm font-medium">Total Consultations</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-(--color-text-muted) mt-1">This month</p>
+              <div className="text-2xl font-bold">{data?.consultations}</div>
+              {/* <p className="text-xs text-(--color-text-muted) mt-1"></p> */}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Pending Transcriptions</CardTitle>
+              <CardTitle className="text-sm font-medium">Patients</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-(--color-text-muted) mt-1">Being processed</p>
+              <div className="text-2xl font-bold">{data?.patients}</div>
+              <p className="text-xs text-(--color-text-muted) mt-1">total</p>
             </CardContent>
           </Card>
         </div>

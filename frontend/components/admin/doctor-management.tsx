@@ -15,10 +15,22 @@ import { Department, DoctorSpecialization, DoctorType, IDoctor } from "@/types/d
 import FormInput from "../form/FormInput"
 import FormCombobox from "../form/FormCombobox"
 import FormRadioGroup from "../form/FormRadioGroup"
+import { Input } from "../ui/input"
+import { Label } from "../ui/label"
+import useDebounce from "@/hooks/use-debounce"
+import CustomModal from "../CustomModal"
+import CustomSelect from "../CustomSelect"
+import CustomPagination from "../CustomPagination"
 
 
 export function DoctorManagement() {
   const [showAddForm, setShowAddForm] = useState(false)
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedDoctor, setSelectedDoctor] = useState<IDoctor | null>(null)
+  const debouncedSetSearch = useDebounce(setDebouncedSearch, 300);
 
   const { register, handleSubmit, formState, control } = useForm<z.infer<typeof addDoctorSchema>>({
     defaultValues: {
@@ -35,8 +47,15 @@ export function DoctorManagement() {
   })
 
   const { data: doctors = [], refetch } = useQuery({
-    queryKey: ["doctors"],
-    queryFn: () => apiClient.get<IDoctor[]>("/api/v1/doctor/"),
+    queryKey: ["doctors", page, limit, debouncedSearch],
+    queryFn: async () => {
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        search: debouncedSearch,
+      }).toString();
+      return (await apiClient.get<{ data: IDoctor[] }>(`/api/v1/doctor?${queryParams}`)).data
+    }
   })
 
   const addDoctorMutation = useMutation({
@@ -51,7 +70,7 @@ export function DoctorManagement() {
   })
 
   const deleteDoctorMutation = useMutation({
-    mutationFn: (doctorId: number) => apiClient.post(`/api/v1/doctor/${doctorId}/delete`, {}),
+    mutationFn: (doctor_slug: string) => apiClient.delete(`/api/v1/doctor/${doctor_slug}`),
     onSuccess: () => {
       refetch()
     },
@@ -61,7 +80,6 @@ export function DoctorManagement() {
   })
 
   const onSubmit = (data: z.infer<typeof addDoctorSchema>) => {
-    console.log(data)
     addDoctorMutation.mutate(data)
   }
 
@@ -137,6 +155,29 @@ export function DoctorManagement() {
       )}
 
       <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2">
+            <Input
+              id="search"
+              placeholder="Search by name, email, or specialty..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                debouncedSetSearch(e.target.value);
+              }}
+            />
+          </div>
+          <CustomSelect
+            data={[
+              { label: "10", value: "10" },
+              { label: "15", value: "15" },
+              { label: "20", value: "20" }
+            ]}
+            label="Per Page"
+            defaultValue="10"
+            onChange={(val) => setLimit(Number(val))}
+          />
+        </div>
         {doctors.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center text-(--color-text-muted)">No doctors added yet</CardContent>
@@ -150,24 +191,38 @@ export function DoctorManagement() {
                     <h4 className="font-semibold">
                       Dr. {doctor.firstName} {doctor.lastName}
                     </h4>
-                    <p className="text-sm text-(--color-text-muted)">{doctor.specialization}</p>
+                    <p className="text-sm text-(--color-text-muted)">{doctor.specialization.replaceAll("_", " ")}</p>
                     <p className="text-xs text-(--color-text-muted) mt-1">
                       {doctor.email} • {doctor.phoneNumber}
                     </p>
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteDoctorMutation.mutate(doctor.id)}
-                    disabled={deleteDoctorMutation.isPending}
-                  >
-                    Remove
-                  </Button>
+                  <Button variant={"destructive"} onClick={() => setSelectedDoctor(doctor)} className="cursor-pointer">Remove</Button>
                 </div>
               </CardContent>
             </Card>
           ))
         )}
+        <CustomModal
+          open={!!selectedDoctor}
+          onOpenChange={(open) => !open && setSelectedDoctor(null)}
+          title="Delete Doctor"
+          description="Are you sure you want to remove this doctor from the medical institute?"
+          primaryActionText="Delete"
+          onPrimaryAction={() => {
+            if (selectedDoctor) {
+              deleteDoctorMutation.mutate(selectedDoctor.slug)
+            }
+            setSelectedDoctor(null)
+          }}
+          onSecondaryAction={() => setSelectedDoctor(null)}
+          disabled={deleteDoctorMutation.isPending}
+        />
+
+        <CustomPagination
+          page={page}
+          setPage={setPage}
+          isNextAvailable={doctors.length == limit}
+        />
       </div>
     </div>
   )

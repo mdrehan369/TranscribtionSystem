@@ -20,3 +20,27 @@ export const AddDoctorSchema: FastifySchema = {
     additionalProperties: false
   }
 };
+
+export const ListDoctorSchema: FastifySchema = {
+  tags: ['Doctor'],
+  querystring: {
+    type: "object",
+    required: [],
+    properties: {
+      page: { type: 'integer', minimum: 1 },
+      limit: { type: 'integer', minimum: 10 },
+      search: { type: 'string', default: "" }
+    }
+  }
+}
+
+export const DeleteDoctorSchema: FastifySchema = {
+  tags: ['Doctor'],
+  params: {
+    type: "object",
+    required: ['doctor_slug'],
+    properties: {
+      doctor_slug: { type: "string", description: "Slug of the doctor to delete" }
+    }
+  }
+}

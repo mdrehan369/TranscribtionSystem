@@ -27,5 +27,17 @@ export class DoctorService {
     const newDoctor = await this.doctorRepository.addDoctor({ ...data, slug }, instituteId)
     return { success: true, message: statusMessages.success, code: statusCodes.CREATED, data: newDoctor }
   }
+
+  async listDoctor(page: number = 1, limit: number = 10, search: string = "") {
+    const data = await this.doctorRepository.listDoctor(page, limit, search)
+    return { success: true, message: statusMessages.success, code: statusCodes.OK, data }
+  }
+
+  async deleteDoctor(slug: string) {
+    const doesExists = await this.doctorRepository.findBySlug(slug)
+    if (!doesExists) return { success: false, message: statusMessages.notFound, code: statusCodes.NOT_FOUND }
+    await this.doctorRepository.deleteDoctor(slug)
+    return { success: true, message: statusMessages.success, code: statusCodes.OK }
+  }
 }
 

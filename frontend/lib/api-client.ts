@@ -33,6 +33,20 @@ export const apiClient = {
     return response.json()
   },
 
+  async delete<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "delete",
+      credentials: "include",
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || "API request failed")
+    }
+
+    return response.json()
+  },
+
   async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",

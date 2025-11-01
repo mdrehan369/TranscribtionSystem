@@ -1,4 +1,4 @@
-import type { Department, DoctorType } from "../prisma/generated/prisma/index.js";
+import type { Department, DoctorSpecialization, DoctorType } from "../prisma/generated/prisma/index.js";
 
 
 export type AddDoctorBody = {
@@ -7,7 +7,7 @@ export type AddDoctorBody = {
   password: string;
   email: string;
   phoneNumber: string;
-  specialization: string;
+  specialization: DoctorSpecialization;
   department: Department;
   doctorType: DoctorType;
 }
